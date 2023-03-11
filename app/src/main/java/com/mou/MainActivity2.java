@@ -1,7 +1,6 @@
 package com.mou;
 
 
-
 import android.annotation.SuppressLint;
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -19,7 +18,7 @@ import androidx.viewpager2.widget.ViewPager2;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity2 extends AppCompatActivity {
+public class MainActivity2 extends AppCompatActivity implements DialogCallBack {
 
     private static final String TAG = "wxx";
     private View ib_home;
@@ -110,7 +109,7 @@ public class MainActivity2 extends AppCompatActivity {
     }
 
     private void fragmentInit() {
-        basic_database =openOrCreateDatabase("basic_database.db",MODE_PRIVATE,null);
+        basic_database = openOrCreateDatabase("basic_database.db", MODE_PRIVATE, null);
         cursor = basic_database.query("user_basic_tb", null, null, null, null, null, null);
         if (cursor.moveToFirst()) {
             do {
@@ -120,7 +119,7 @@ public class MainActivity2 extends AppCompatActivity {
                     mTableList.add(string);
                 }
             } while (cursor.moveToNext());
-        }else Log.d("wxx", "fragmentInit: cursor为空");
+        } else Log.d("wxx", "fragmentInit: cursor为空");
         cursor.close();
         basic_database.close();
     }
@@ -141,7 +140,8 @@ public class MainActivity2 extends AppCompatActivity {
             basic_database.execSQL("create table if not exists default_tb("
                     + "_id integer primary key,"
                     + "title varchar(100),"
-                    + "component varchar(1024))");
+                    + "component varchar(1024),"
+                    + "date date)");
             ContentValues contentValues = new ContentValues();
             contentValues.put("table_name", "default_tb");
             contentValues.put("folder_name", "默认");
@@ -150,4 +150,11 @@ public class MainActivity2 extends AppCompatActivity {
         cursor.close();
         basic_database.close();
     }
+
+    @Override
+    public void onDialogCallBack(String text) {
+        Log.d(TAG, "onDialogCallBack: 123"+text);
+    }
+
+    ;
 }
