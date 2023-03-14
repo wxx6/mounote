@@ -120,8 +120,8 @@ public class MainActivity2 extends AppCompatActivity implements DialogCallBack {
                 }
             } while (cursor.moveToNext());
         } else Log.d("wxx", "fragmentInit: cursor为空");
-        cursor.close();
-        basic_database.close();
+        //cursor.close();
+        //basic_database.close();
     }
 
     private void databaseInit() {
@@ -147,14 +147,27 @@ public class MainActivity2 extends AppCompatActivity implements DialogCallBack {
             contentValues.put("folder_name", "默认");
             basic_database.insert("user_basic_tb", null, contentValues);
         }
-        cursor.close();
-        basic_database.close();
+        //cursor.close();
+        //basic_database.close();
     }
 
     @Override
     public void onDialogCallBack(String text) {
-        Log.d(TAG, "onDialogCallBack: 123"+text);
+        Log.d(TAG, "onDialogCallBack: 123" + text);
+        //创建一个表default_tb+id,并且在user_basic_tb中插入一条表信息
+        cursor.moveToFirst();
+        while(cursor.moveToNext()){}
+        int index=cursor.getPosition();
+        basic_database.execSQL("create table if not exists default_tb"+index+"(" +
+                "_id integer primary key," +
+                "title varchar(100)," +
+                "component varchar(1024)," +
+                "date date)");
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("table_name", "default_tb"+index);
+        contentValues.put("folder_name", text);
+        basic_database.insert("user_basic_tb",null,contentValues);
+
     }
 
-    ;
 }

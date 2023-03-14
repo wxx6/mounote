@@ -54,7 +54,6 @@ public class AddFragment extends Fragment {
         return fragment;
     }
 
-    //两个onAttach都要重写，防止别人调用不同的onAttach方法
     @Override
     public void onAttach(@NonNull Context context) {
         super.onAttach(context);
@@ -101,12 +100,16 @@ public class AddFragment extends Fragment {
             //获取dialog的操作信息
             switch (v.getId()){
                 case R.id.add_new_folder_dialog_confirm:
-                    EditText editText=v.findViewById(R.id.add_new_folder_dialog_edit);
+                    EditText editText=addNewFolderDialog.findViewById(R.id.add_new_folder_dialog_edit);
                     if(editText.getText().toString().isEmpty()){
                         addNewFolderDialog.dismiss();
                     }else{
-                        Log.d(TAG, "onViewCreated: "+editText.getText().toString());
                         mDialogCallBack.onDialogCallBack(editText.getText().toString());
+                        addNewFolderDialog.dismiss();
+                        ArrayAdapter spinnerAdapter = (ArrayAdapter) spinner.getAdapter();
+                        spinnerAdapter.remove("新建");
+                        spinnerAdapter.add(editText.getText().toString());
+                        spinnerAdapter.add("新建");
                     }
                     break;
                 case R.id.add_new_folder_dialog_cancel:
