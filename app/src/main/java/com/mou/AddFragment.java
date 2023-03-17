@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 
@@ -32,6 +33,8 @@ public class AddFragment extends Fragment {
     private final String TAG = "wxx";
     private AddNewFolderDialog addNewFolderDialog;
     private DialogCallBack mDialogCallBack;
+    private CommitCallBack mCommitCallBack;
+    private String spinner_item;
 
     public AddFragment() {
         // Required empty public constructor
@@ -62,6 +65,7 @@ public class AddFragment extends Fragment {
 
         } else {
             mDialogCallBack = (DialogCallBack) context;
+            mCommitCallBack = (CommitCallBack) context;
         }
 
     }
@@ -98,12 +102,12 @@ public class AddFragment extends Fragment {
         View.OnClickListener onClickListener = v -> {
             Log.d(TAG, "onViewCreated: 点击监听");
             //获取dialog的操作信息
-            switch (v.getId()){
+            switch (v.getId()) {
                 case R.id.add_new_folder_dialog_confirm:
-                    EditText editText=addNewFolderDialog.findViewById(R.id.add_new_folder_dialog_edit);
-                    if(editText.getText().toString().isEmpty()){
+                    EditText editText = addNewFolderDialog.findViewById(R.id.add_new_folder_dialog_edit);
+                    if (editText.getText().toString().isEmpty()) {
                         addNewFolderDialog.dismiss();
-                    }else{
+                    } else {
                         mDialogCallBack.onDialogCallBack(editText.getText().toString());
                         addNewFolderDialog.dismiss();
                         ArrayAdapter spinnerAdapter = (ArrayAdapter) spinner.getAdapter();
@@ -120,9 +124,9 @@ public class AddFragment extends Fragment {
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String item = String.valueOf(parent.getSelectedItem());
+                spinner_item = String.valueOf(parent.getSelectedItem());
                 //Log.d(TAG, "onItemSelected: " + item);
-                if (item.equals("新建")) {
+                if (spinner_item.equals("新建")) {
                     addNewFolderDialog = new AddNewFolderDialog(getActivity(), R.style.NewDialogTheme, onClickListener);
                     addNewFolderDialog.show();
                 }
@@ -131,6 +135,22 @@ public class AddFragment extends Fragment {
             @Override
             public void onNothingSelected(AdapterView<?> parent) {
 
+            }
+        });
+        Button btn_commit = view.findViewById(R.id.btn_commit);
+        btn_commit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EditText edit_title = view.findViewById(R.id.edit_title);
+                EditText edit_component = view.findViewById(R.id.edit_component);
+                //传递三个字符串：两个编辑框，一个spinner文件夹信息
+                List<String> string_list=new ArrayList<>();
+                string_list.add(edit_title.getText().toString());
+                string_list.add(edit_component.getText().toString());
+                string_list.add(spinner_item);
+                mCommitCallBack.onCommitCallBack(string_list);
+                edit_title.setText(null);
+                edit_component.setText(null);
             }
         });
     }

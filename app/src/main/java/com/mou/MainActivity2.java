@@ -15,10 +15,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
+import java.sql.Date;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity2 extends AppCompatActivity implements DialogCallBack {
+public class MainActivity2 extends AppCompatActivity implements DialogCallBack, CommitCallBack {
 
     private static final String TAG = "wxx";
     private View ib_home;
@@ -170,4 +172,21 @@ public class MainActivity2 extends AppCompatActivity implements DialogCallBack {
 
     }
 
+    @Override
+    public void onCommitCallBack(List<String> string_list){
+        String folder_name=string_list.get(2);
+        cursor=basic_database.query("user_basic_tb",new String[]{"table_name"},"folder_name=?",new String[]{folder_name},null,null,null);
+        cursor.moveToFirst();
+        String table_name=cursor.getString(0);
+        Log.d(TAG, "onCommitCallBack: table_name="+table_name);
+        ContentValues contentValues = new ContentValues();
+        contentValues.put("title", string_list.get(0));
+        contentValues.put("component", string_list.get(1));
+        long time=System.currentTimeMillis();
+        Date date=new Date(time);
+        SimpleDateFormat dateFormat=new SimpleDateFormat("yyyy-MM-dd");
+        contentValues.put("date",dateFormat.format(date));
+        basic_database.insert(table_name,null,contentValues);
+        Toast.makeText(MainActivity2.this, "已提交", Toast.LENGTH_SHORT).show();
+    }
 }
