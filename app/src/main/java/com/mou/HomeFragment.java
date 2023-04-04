@@ -1,30 +1,45 @@
 package com.mou;
 
+import android.content.Context;
+import android.graphics.Rect;
+import android.os.Build;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
+import android.widget.ListView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 
-public class HomeFragment extends Fragment {
+import java.util.ArrayList;
+import java.util.List;
 
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+public class HomeFragment extends Fragment implements TextWatcher {
 
-    private String mParam1;
-    private String mParam2;
+    private static final String TAG = "wxx";
+    private List<String> mTitleList =new ArrayList<>();
     View rootView;
+    private List<String> mComponentList =new ArrayList<>();
+    private ListViewAdapter adapter;
+    private ListView listView;
 
     public HomeFragment() {
         // Required empty public constructor
     }
 
-    public static HomeFragment newInstance(String param1, String param2) {
+    public static HomeFragment newInstance(List<String> param1, List<String> param2) {
         HomeFragment fragment = new HomeFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putStringArrayList("title", (ArrayList<String>) param1);
+        args.putStringArrayList("component", (ArrayList<String>) param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -33,18 +48,71 @@ public class HomeFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            mTitleList=getArguments().getStringArrayList("title");
+            mComponentList=getArguments().getStringArrayList("component");
         }
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         if (rootView == null) {
             rootView = inflater.inflate(R.layout.fragment_home, container, false);
         }
+        rootView.setOnTouchListener(new View.OnTouchListener() {
+            @RequiresApi(api = Build.VERSION_CODES.M)
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                // 当用户点击非 EditText 区域时，隐藏输入法
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    View focusedView = getActivity().getCurrentFocus();
+                    if (focusedView instanceof EditText) {
+                        Rect outRect = new Rect();
+                        focusedView.getGlobalVisibleRect(outRect);
+                        if (!outRect.contains((int)event.getRawX(), (int)event.getRawY())) {
+                            focusedView.clearFocus();
+                            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                            imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                        }
+                    }
+                }
+                return false;
+            }
+        });
+        initHome();
         return rootView;
     }
+
+    private void initHome() {
+        //LinearLayout layout= rootView.findViewById(R.id.layout_database_scroll_view);
+        listView = rootView.findViewById(R.id.listView);
+        adapter = new ListViewAdapter(mTitleList,mComponentList);
+        listView.setAdapter(adapter);
+        EditText editText=rootView.findViewById(R.id.search);
+        editText.addTextChangedListener(this);
+    }
+
+    @Override
+    public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    @Override
+    public void onTextChanged(CharSequence s, int start, int before, int count) {
+        String searchText=s.toString();
+        adapter.filterItems(searchText);
+
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    @Override
+    public void afterTextChanged(Editable s) {
+        if(TextUtils.isEmpty(s.toString().trim())){
+            listView.setAdapter(adapter);
+            adapter.notifyDataSetChanged();
+        }
+    }
+
 }

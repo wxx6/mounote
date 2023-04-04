@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">某笔记</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="editText1">请输入搜索内容</string>
+    <string name="editText1">请输入搜索内容（仅支持搜索标题）</string>
     <string name="setting">设置</string>
     <string name="add">来一笔</string>
     <string name="home">主页</string>

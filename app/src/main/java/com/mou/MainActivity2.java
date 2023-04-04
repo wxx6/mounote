@@ -29,7 +29,9 @@ public class MainActivity2 extends AppCompatActivity implements DialogCallBack, 
     private ViewPager2 viewpager;
     private SQLiteDatabase basic_database;
     private Cursor cursor;
-    private final List<String> mTableList = new ArrayList<>();
+    private final List<String> mSpinnerList = new ArrayList<>();
+    private final List<String> mScrollTitleList = new ArrayList<>();
+    private final List<String> mScrollComponentList = new ArrayList<>();
 
     @SuppressLint("NotifyDataSetChanged")
     @Override
@@ -102,9 +104,9 @@ public class MainActivity2 extends AppCompatActivity implements DialogCallBack, 
     private void viewpagerInit() {
         viewpager = findViewById(R.id.viewpager);
         ArrayList<Fragment> fragments = new ArrayList<>();
-        fragments.add(HomeFragment.newInstance("123", "456"));
-        mTableList.add("新建");
-        fragments.add(AddFragment.newInstance(mTableList));
+        fragments.add(HomeFragment.newInstance(mScrollTitleList,mScrollComponentList));
+        mSpinnerList.add("新建");
+        fragments.add(AddFragment.newInstance(mSpinnerList));
         fragments.add(SettingFragment.newInstance("123", "456"));
         ViewPagerAdapter viewPagerAdapter = new ViewPagerAdapter(getSupportFragmentManager(), getLifecycle(), fragments);
         viewpager.setAdapter(viewPagerAdapter);
@@ -118,10 +120,25 @@ public class MainActivity2 extends AppCompatActivity implements DialogCallBack, 
                 int index = cursor.getColumnIndex("folder_name");
                 if (index != -1) {
                     String string = cursor.getString(index);
-                    mTableList.add(string);
+                    mSpinnerList.add(string);
                 }
             } while (cursor.moveToNext());
         } else Log.d("wxx", "fragmentInit: cursor为空");
+        cursor=basic_database.query("all_tb",null,null,null,null,null,"date desc","0,10");
+        if(cursor.moveToFirst()){
+            do{
+                int index1=cursor.getColumnIndex("title");
+                if(index1!=-1){
+                    String title=cursor.getString(index1);
+                    mScrollTitleList.add(title);
+                }
+                int index2=cursor.getColumnIndex("component");
+                if(index2!=-1){
+                    String component=cursor.getString(index2);
+                    mScrollComponentList.add(component);
+                }
+            }while(cursor.moveToNext());
+        }
         //cursor.close();
         //basic_database.close();
     }
@@ -134,6 +151,11 @@ public class MainActivity2 extends AppCompatActivity implements DialogCallBack, 
                 + "_id integer primary key,"
                 + "table_name varchar(100),"
                 + "folder_name varchar(100))");
+        basic_database.execSQL("create table if not exists all_tb("
+                + "_id integer primary key,"
+                + "title varchar(100),"
+                + "component varchar(1024),"
+                + "date date)");
         //if(basic_database!=null) basic_database.close();
         cursor = basic_database.query("user_basic_tb", null, null, null, null, null, null);
         //如果user_basic_tb为空，则创建表default_tb,并在user_basic_tb插入一条表信息
@@ -158,35 +180,37 @@ public class MainActivity2 extends AppCompatActivity implements DialogCallBack, 
         Log.d(TAG, "onDialogCallBack: 123" + text);
         //创建一个表default_tb+id,并且在user_basic_tb中插入一条表信息
         cursor.moveToFirst();
-        while(cursor.moveToNext()){}
-        int index=cursor.getPosition();
-        basic_database.execSQL("create table if not exists default_tb"+index+"(" +
+        while (cursor.moveToNext()) {
+        }
+        int index = cursor.getPosition();
+        basic_database.execSQL("create table if not exists default_tb" + index + "(" +
                 "_id integer primary key," +
                 "title varchar(100)," +
                 "component varchar(1024)," +
                 "date date)");
         ContentValues contentValues = new ContentValues();
-        contentValues.put("table_name", "default_tb"+index);
+        contentValues.put("table_name", "default_tb" + index);
         contentValues.put("folder_name", text);
-        basic_database.insert("user_basic_tb",null,contentValues);
+        basic_database.insert("user_basic_tb", null, contentValues);
 
     }
 
     @Override
-    public void onCommitCallBack(List<String> string_list){
-        String folder_name=string_list.get(2);
-        cursor=basic_database.query("user_basic_tb",new String[]{"table_name"},"folder_name=?",new String[]{folder_name},null,null,null);
+    public void onCommitCallBack(List<String> string_list) {
+        String folder_name = string_list.get(2);
+        cursor = basic_database.query("user_basic_tb", new String[]{"table_name"}, "folder_name=?", new String[]{folder_name}, null, null, null);
         cursor.moveToFirst();
-        String table_name=cursor.getString(0);
-        Log.d(TAG, "onCommitCallBack: table_name="+table_name);
+        String table_name = cursor.getString(0);
+        Log.d(TAG, "onCommitCallBack: table_name=" + table_name);
         ContentValues contentValues = new ContentValues();
         contentValues.put("title", string_list.get(0));
         contentValues.put("component", string_list.get(1));
-        long time=System.currentTimeMillis();
-        Date date=new Date(time);
-        SimpleDateFormat dateFormat=new SimpleDateFormat("yyyy-MM-dd");
-        contentValues.put("date",dateFormat.format(date));
-        basic_database.insert(table_name,null,contentValues);
+        long time = System.currentTimeMillis();
+        Date date = new Date(time);
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        contentValues.put("date", dateFormat.format(date));
+        basic_database.insert(table_name, null, contentValues);
+        basic_database.insert("all_tb",null,contentValues);
         Toast.makeText(MainActivity2.this, "已提交", Toast.LENGTH_SHORT).show();
     }
 }

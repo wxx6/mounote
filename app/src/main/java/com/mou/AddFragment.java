@@ -1,11 +1,15 @@
 package com.mou;
 
 import android.content.Context;
+import android.graphics.Rect;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -14,6 +18,7 @@ import android.widget.Spinner;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 
 import java.util.ArrayList;
@@ -27,7 +32,7 @@ public class AddFragment extends Fragment {
 
     private String mParam1;
     private String mParam2;
-    private List<String> mParam3 = new ArrayList<>();
+    private List<String> mSpinnerList = new ArrayList<>();
     private View rootView;
     private Spinner spinner;
     private final String TAG = "wxx";
@@ -38,15 +43,6 @@ public class AddFragment extends Fragment {
 
     public AddFragment() {
         // Required empty public constructor
-    }
-
-    public static AddFragment newInstance(String param1, String param2) {
-        AddFragment fragment = new AddFragment();
-        Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
-        fragment.setArguments(args);
-        return fragment;
     }
 
     public static AddFragment newInstance(List<String> param1) {
@@ -77,7 +73,7 @@ public class AddFragment extends Fragment {
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
-            mParam3 = getArguments().getStringArrayList("string");
+            mSpinnerList = getArguments().getStringArrayList("string");
         }
 
     }
@@ -90,6 +86,26 @@ public class AddFragment extends Fragment {
             rootView = inflater.inflate(R.layout.fragment_add, container, false);
         }
         //Log.d("wxx", "onCreateView: ");
+        rootView.setOnTouchListener(new View.OnTouchListener() {
+            @RequiresApi(api = Build.VERSION_CODES.M)
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                // 当用户点击非 EditText 区域时，隐藏输入法
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    View focusedView = getActivity().getCurrentFocus();
+                    if (focusedView instanceof EditText) {
+                        Rect outRect = new Rect();
+                        focusedView.getGlobalVisibleRect(outRect);
+                        if (!outRect.contains((int)event.getRawX(), (int)event.getRawY())) {
+                            focusedView.clearFocus();
+                            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+                            imm.hideSoftInputFromWindow(v.getWindowToken(), 0);
+                        }
+                    }
+                }
+                return false;
+            }
+        });
         initSpinner();
 
         return rootView;
@@ -159,8 +175,8 @@ public class AddFragment extends Fragment {
         Spinner spinner = rootView.findViewById(R.id.spinner);
         String[] spin_text = {"默认", "新建"};
         //String[] tmp = append(spin_text, "默认");
-        if (mParam3.isEmpty()) Log.d("wxx", "initSpinner: mParam3为空");
-        ArrayAdapter adapter = new ArrayAdapter(getContext(), android.R.layout.simple_spinner_dropdown_item, mParam3);
+        if (mSpinnerList.isEmpty()) Log.d("wxx", "initSpinner: mParam3为空");
+        ArrayAdapter adapter = new ArrayAdapter(getContext(), android.R.layout.simple_spinner_dropdown_item, mSpinnerList);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         if (spinner != null) {
             spinner.setAdapter(adapter);
