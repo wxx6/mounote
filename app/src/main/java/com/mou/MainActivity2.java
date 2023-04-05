@@ -216,6 +216,11 @@ public class MainActivity2 extends AppCompatActivity implements DialogCallBack, 
 
     @Override
     public void onScrollCallBack(List<String> title, List<String> component) {
-
+        mSpinnerList.clear();
+        mScrollTitleList.clear();
+        mScrollComponentList.clear();
+        fragmentInit();
+        title=mScrollTitleList;
+        component=mScrollComponentList;
     }
 }

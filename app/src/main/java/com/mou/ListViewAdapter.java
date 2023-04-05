@@ -7,7 +7,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.RequiresApi;
@@ -52,13 +51,7 @@ public class ListViewAdapter extends BaseAdapter {
         text = mComponentList.get(position);
         textView2.setText(text);
 
-        LinearLayout linearLayout = convertView.findViewById(R.id.listView_layout);
-        linearLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                System.out.println("敬请期待");
-            }
-        });
+
         return convertView;
     }
 

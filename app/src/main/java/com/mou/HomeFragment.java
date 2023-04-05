@@ -19,6 +19,7 @@ import android.widget.ListView;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +32,7 @@ public class HomeFragment extends Fragment implements TextWatcher {
     private List<String> mComponentList = new ArrayList<>();
     private ListViewAdapter adapter;
     private ListView listView;
+    private ScrollCallBack mScrollCallBack;
 
     public HomeFragment() {
         // Required empty public constructor
@@ -43,6 +45,16 @@ public class HomeFragment extends Fragment implements TextWatcher {
         args.putStringArrayList("component", (ArrayList<String>) param2);
         fragment.setArguments(args);
         return fragment;
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        if (!(context instanceof ScrollCallBack)) {
+            throw new IllegalStateException("没有实现ScrollCallBack接口");
+        } else {
+            mScrollCallBack = (ScrollCallBack) context;
+        }
     }
 
     @Override
@@ -84,12 +96,16 @@ public class HomeFragment extends Fragment implements TextWatcher {
         EditText editText = rootView.findViewById(R.id.search);
         editText.addTextChangedListener(this);
         listView = rootView.findViewById(R.id.listView);
-        listView.setOnScrollChangeListener(new View.OnScrollChangeListener() {
+        SwipeRefreshLayout swipeRefreshLayout = rootView.findViewById(R.id.refreshLayout);
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
-            public void onScrollChange(View v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
-
+            public void onRefresh() {
+                mScrollCallBack.onScrollCallBack(mTitleList, mComponentList);
+                initHome();
+                swipeRefreshLayout.setRefreshing(false);
             }
         });
+
         initHome();
         return rootView;
     }
