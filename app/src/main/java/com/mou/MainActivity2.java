@@ -20,7 +20,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity2 extends AppCompatActivity implements DialogCallBack, CommitCallBack {
+public class MainActivity2 extends AppCompatActivity implements DialogCallBack, CommitCallBack, ScrollCallBack {
 
     private static final String TAG = "wxx";
     private View ib_home;
@@ -212,5 +212,10 @@ public class MainActivity2 extends AppCompatActivity implements DialogCallBack, 
         basic_database.insert(table_name, null, contentValues);
         basic_database.insert("all_tb",null,contentValues);
         Toast.makeText(MainActivity2.this, "已提交", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onScrollCallBack(List<String> title, List<String> component) {
+
     }
 }

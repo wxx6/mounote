@@ -1,6 +1,8 @@
 package com.mou;
 
 import android.os.Build;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ListViewAdapter extends BaseAdapter {
+    private final String TAG ="wxx";
     private List<String> mTitleList;
     private List<String> mComponentList;
 
@@ -64,14 +67,18 @@ public class ListViewAdapter extends BaseAdapter {
         List<String> mmTitle = new ArrayList<>();
         List<String> mmComponent = new ArrayList<>();
         for (String item : mTitleList) {
-            if (item.toLowerCase().contains(searchText)) {
+            if(TextUtils.isEmpty(searchText)){
+                Log.d(TAG, "filterItems: 文本为空");
+            }else Log.d(TAG, "filterItems: 文本不为空");
+            if (item.toLowerCase().contains(searchText)|| TextUtils.isEmpty(searchText)) {
                 mmTitle.add(item);
                 int index = mTitleList.indexOf(item);
                 mmComponent.add(mComponentList.get(index));
             }
         }
-        mTitleList=mmTitle;
-        mComponentList=mmComponent;
+
+        mTitleList = mmTitle;
+        mComponentList = mmComponent;
         notifyDataSetChanged();
     }
 }
